@@ -1,0 +1,40 @@
+#!/usr/bin/env gnuplot
+
+set term postscript enhanced color font "Helvetica,14"
+set encoding utf8
+
+# diffusion constant calculated from least squares fit
+D(filename) = system(sprintf("grep Fit %s | sed -E 's/^.*: *([0-9.-]+) ±.*/\\1/'", filename))
+
+# diffusion plus or minus error
+Dpe(filename) = system(sprintf("grep Fit %s | sed -E 's/^.*: *([0-9.-]+ ± [0-9.-]+).*/\\1/'", filename))
+
+# y-intercept of the line that was least squares fit
+b(filename) = system(sprintf("grep Fit %s | sed -E 's/.*intercept ([0-9.-]+).*/\\1/'", filename))
+bpe(filename) = system(sprintf("grep Fit %s | sed -E 's/.*intercept ([0-9.-]+ ± [0-9.-]+).*/\\1/'", filename))
+
+replica=`pwd | sed -E "s#.*/[^0-9]*([0-9]*)/.*#\1#"`
+set title sprintf("POPC Displacement (%d nm gap)", replica) font ",24"
+set key font ",18"
+set tics font ",18"
+
+set ylabel "MSD (Å^2)" font ",20"
+set xlabel "{/Symbol t} (ns)" font ",20"
+set xrange [0:]
+set yrange [0:]
+
+d1  = D("diffusion_top_250.csv")
+de1 = Dpe("diffusion_top_250.csv")
+i1  = b("diffusion_top_250.csv")
+d2  = D("diffusion_bot_250.csv")
+de2 = Dpe("diffusion_bot_250.csv")
+i2  = b("diffusion_bot_250.csv")
+
+set output "msd.eps"
+plot "diffusion_top_250.csv" every 100 w points ls 1 t "", \
+     d1*4*x + i1 w l ls 1 t "", \
+     "diffusion_top_250.csv" every 1000000 w lp ls 1 t sprintf('D_{top} = %s (Å^2/ns)', de1), \
+     "diffusion_bot_250.csv" every 100 with points ls 2 title "", \
+     d2*4*x + i2 w l ls 2 t "", \
+     "diffusion_bot_250.csv" every 1000000 w lp ls 2 t sprintf('D_{bot} = %s (Å^2/ns)', de2)
+

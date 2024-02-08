@@ -1,0 +1,15 @@
+#!/usr/bin/env gnuplot
+
+set term pngcairo enhanced color font "Arial,14"
+set encoding utf8
+
+replica=`pwd | sed -E "s#.*/[^0-9]*([0-9]*)/.*#\1#"`
+set title sprintf("POPC Displacement (%d nm gap)", replica) font ",20"
+
+set ylabel "MSD (Å^2)" font ",18"
+set xlabel "Lag time (ns)" font ",18"
+set xrange [0:]
+set yrange [0:]
+
+set output "msd.png"
+plot "diffusion_top_full.csv" with line title "Top leaflet"
