@@ -1,0 +1,18 @@
+* Gets initial coordinates, with positional constraints
+* (psf: 1mjc)
+* Usage: stream polinfo/position_1.str xlen ylen zlen [copy_index]
+* copy index only relevant for individually-positioned components
+* sets coordinates in xcor/ycor/zcor relative to origin
+*
+
+if @?IN1 .eq. 0 stop ! ABNORMAL TERMINATION: missing length of X dimension
+if @?IN2 .eq. 0 stop ! ABNORMAL TERMINATION: missing length of Y dimension
+if @?IN3 .eq. 0 stop ! ABNORMAL TERMINATION: missing length of Z dimension
+
+calc xpos = @IN1 * ( ?random - 0.5 )
+set xrand = YES
+calc ypos = @IN2 * ( ?random - 0.5 )
+set yrand = YES
+calc zpos = @IN3 * ( ?random - 0.5 )
+set zrand = YES
+

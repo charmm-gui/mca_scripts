@@ -1,0 +1,61 @@
+#!/usr/bin/env gnuplot
+
+set term postscript enhanced color font "Helvetica,20"
+
+set grid back lw 1 lc "black"
+set size ratio 1
+set tics font ",22"
+
+do for [i=1:11] {
+    set linetype i linewidth 2 linecolor rgb (i%2 ? "red" : "blue")
+}
+
+# associates shape with test type; color is program type
+lpt(i) = i%2*2 + i/2 +4
+
+ndirs = 2
+#array dirs[ndirs] = ['mca_benchmark', 'packmol_benchmark']
+array dirs[ndirs] = ['packmol_benchmark', 'mca_benchmark']
+array prog[ndirs] = ['PACKMOL', 'MCA']
+
+nsets = 2
+array molsets[nsets] = ['easy', 'hard']
+#array molnames[nsets] = ['{/Symbol D}_{/Symbol m} = 0.12', '{/Symbol D}_{/Symbol m} = 0.24']
+array molnames[nsets] = ['Easy', 'Hard']
+
+set title "Packing Runtime" font ",28"
+set xlabel "Volume Fraction (% v/v)" font ",24"
+set ylabel "Runtime (s)" font ",24"
+
+set output "runtimes.eps"
+plot for [i=0:ndirs*nsets-1] \
+         sprintf('../%s/stats.%s.avg.dat', dirs[i/2+1], molsets[i%2+1]) u 1:2:3 w yerrorbars \
+         lt lpt(i) t sprintf('%s (%s)', prog[i/2+1], molnames[i%2+1]), \
+     for [i=0:ndirs*nsets-1] \
+         sprintf('../%s/stats.%s.avg.dat', dirs[i/2+1], molsets[i%2+1]) u 1:2 w l \
+         lt lpt(i) t ''
+
+set title "Packing Failure Rate" font ",28"
+set xlabel "Volume Fraction (% v/v)" font ",24"
+set ylabel "% Failed" font ",24"
+set xrange [9:45]
+set yrange [0:125]
+
+set xtics 4
+#set ytics ("0" 0, "33" 33.34, "66" 66.67, 100)
+set ytics (0, 20, 40, 60, 80, 100)
+
+#set style data histogram
+#set style histogram clustered gap 0
+set style fill solid 0.55 border -1
+
+set output "failures1.eps"
+plot for [i=0:ndirs*nsets-1] \
+         sprintf('../%s/stats.%s.avg.dat', dirs[i/2+1], molsets[i%2+1]) u 1:($4*100) \
+         with boxes fillstyle pattern (i%2 ? 3:2) ls lpt(i) t sprintf('%s (%s)', prog[i/2+1], molnames[i%2+1])
+#with boxes fillstyle pattern (i%2 ? 3:2) linestyle i/2+1 t sprintf('%s (%s)', prog[i/2+1], molnames[i%2+1])
+
+set output "failures2.eps"
+plot for [i=0:ndirs*nsets-1] \
+         sprintf('../%s/stats.%s.avg.dat', dirs[i/2+1], molsets[i%2+1]) u 1:($4*100) \
+         w lp ls lpt(i) t sprintf('%s (%s)', prog[i/2+1], molnames[i%2+1])

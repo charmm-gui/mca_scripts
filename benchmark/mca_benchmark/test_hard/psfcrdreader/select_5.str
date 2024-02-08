@@ -1,0 +1,20 @@
+* Defines "target" selection, which selects all atoms which originated from
+* this PSF. First argument restricts selection to the given copy number.
+* Use "*" to select all copies.
+* Original PSF: 6y3g.psf
+*
+
+define target select none end
+define target select target .or. segid HAA@IN1 end
+define target select target .or. segid HAB@IN1 end
+define target select target .or. segid HAC@IN1 end
+define target select target .or. segid HAD@IN1 end
+define target select target .or. segid HAE@IN1 end
+define target select target .or. segid HAF@IN1 end
+define target select target .or. segid HAG@IN1 end
+define target select target .or. segid HAH@IN1 end
+define target select target .or. segid HAI@IN1 end
+define target select target .or. segid HAJ@IN1 end
+define target select target .or. segid HAK@IN1 end
+define target select target .or. segid HAL@IN1 end
+define target select target .or. segid RAA@IN1 end

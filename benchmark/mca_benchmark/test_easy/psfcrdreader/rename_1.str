@@ -1,0 +1,7 @@
+* Renames segments from modified PSF according to Multicomponent Assembler
+* naming scheme.
+* Original PSF: 1ubq.psf
+*
+
+rename segid PAA@IN1 select segid PAA end
+

@@ -1,0 +1,101 @@
+#!/bin/bash
+
+charmm $@ << ENDCHARMM
+* Write one or more frames from DCD to PDB and CHARMM CRD
+*
+
+! Usage: charmm [ARGS] -i psfdcd2pdbcrd.inp
+!
+!   Filename Arguments:
+!       Name    Type      Explanation
+! =========================================================================
+!       input   string    input PSF/DCD filename, not including file extension
+!                         examples: step3_pbcsetup, step5_assembly
+!       psf     filename  input PSF filename, if @input was not specified
+!                         example: step3_pbcsetup.psf
+!       dcd     filename  input DCD filename, if @inputinput was not specified
+!                         example: step7_1.dcd
+!       out     string    output filename, not including file extension;
+!                         PDB and CRD will be written with the same name
+!                         before the file extension (default: frame)
+!       frame   int       frame number to write, if only one is desired
+!       from    int       first frame to write, if range is desired (default: 1)
+!       to      int       last frame to write, if range is desired (default: last)
+!
+!   Frame number arguments are 1-indexed with no regard to the skip values in
+!   the DCD file. I.e., if your DCD contains 10 frames and you want to write
+!   the 2nd and 3rd frames, set from=2 and to=3.
+!
+!   Usage examples:
+!       # read traj.psf and traj.dcd, write frames 2 and 3 as 
+!       # myframe2.pdb/myframe2.crd and myframe3.pdb/myframe3.crd
+!       charmm input=traj from=2 to=3 out=myframe -i psfdcd2pdbcrd.inp
+!
+!       # read step5_input.psf and step7_1.dcd, write only the 5th frame
+!       # as frame.pdb and frame.crd
+!       charmm psf=step5_input.psf dcd=step7_1.dcd frame=5 -i psfdcd2pdbcrd.inp
+!
+!       # write the last 5 frames as frame5.pdb/crd frame6.pdb/crd, etc.
+!       charmm psf=step5_input.psf dcd=step7_1.dcd from=5 -i psfdcd2pdbcrd.inp
+
+DIMENS CHSIZE 5000000 MAXRES 5000000 MAXGRP 5000000
+
+! check if input PSF/CRD basename is provided
+if @?input .eq. 1 then
+    set psf = @input.psf
+    set dcd = @input.dcd
+endif
+
+! else, full PSF/CRD filenames must be specified
+if @?psf .eq. 0 stop ! missing argument: psf filename
+if @?dcd .eq. 0 stop ! missing argument: dcd filename
+
+! output basename is required
+if @?out .eq. 0 set out = frame
+
+if @?frame .eq. 1 then
+    calc from = @frame
+    calc to   = @frame
+endif
+
+if @?from .eq. 0 set from =  1
+
+!
+! Read topology and parameter files
+!
+prnlev 0
+wrnlev 0
+stream toppar.str
+wrnlev 5
+prnlev 5
+
+read psf  card name @psf
+
+set trajunit 12
+open read unit @trajunit file name @dcd
+traj query unit @trajunit
+
+calc nframes = ?NFILE
+calc delta = ?DELTA * ?SKIP
+calc skip = ?SKIP
+calc begin = ?START
+
+if @?to .eq. 0    set to = @nframes
+if to   .eq. last set to = @nframes
+
+traj iread @trajunit nread 1 skip @skip begin @begin
+set framei = 1
+label readtrj
+    traj read
+
+    if framei .ge. @from then
+        if from .eq. @to set outname = @out
+        if from .ne. @to set outname = @out@framei
+        write coor pdb  name @outname.pdb
+        write coor card name @outname.crd
+    endif
+
+    incr framei 
+    if framei .le. @to goto readtrj
+
+ENDCHARMM

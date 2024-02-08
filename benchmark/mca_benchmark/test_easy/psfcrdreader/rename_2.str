@@ -1,0 +1,7 @@
+* Renames segments from modified PSF according to Multicomponent Assembler
+* naming scheme.
+* Original PSF: 1vii.psf
+*
+
+rename segid PAB@IN1 select segid PAB end
+

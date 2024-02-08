@@ -1,0 +1,8 @@
+* Renames segments from modified PSF according to Multicomponent Assembler
+* naming scheme.
+* Original PSF: 2hac.psf
+*
+
+rename segid PAC@IN1 select segid PAC end
+rename segid PAD@IN1 select segid PAD end
+

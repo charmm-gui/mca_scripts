@@ -1,0 +1,23 @@
+* Remove non-membrane residues
+*
+
+! reduce output
+prnlev 0
+wrnlev 0
+
+stream toppar.str
+
+! turn output back on
+prnlev 5
+wrnlev 5
+
+read psf  card name step5_charmm2omm.psf
+read coor card name step7_500.crd
+
+delete atoms select -
+    segid CLA .or. segid SOD .or. -
+    segid TIP3 end
+
+write psf  card name axolemma.psf
+write coor card name axolemma.crd
+

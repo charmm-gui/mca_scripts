@@ -1,0 +1,37 @@
+#!/usr/bin/env python
+import argparse
+import os.path
+import MDAnalysis as mda
+
+macromolecules = [
+    'fba', 'pgi', 'pgk', 'gapa', 'eno', 'pdhx', 'pdha', 'pdhb', 'acka', 'nox',
+    'pta', 'rp', 'if2', 'eftu', 'grol', 'trna',
+]
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-n', action='store_true',
+                    help="sort by # atoms (default: sort by asphericity)")
+parser.add_argument('filename', nargs='*', help="structure file(s) to analyze")
+args = parser.parse_args()
+
+if args.filename:
+    filenames = args.filename
+else:
+    filenames = [mm+'.pdb' for mm in macromolecules]
+
+asphericities = []
+for filename in filenames:
+    u = mda.Universe(filename)
+    molecule = os.path.splitext(filename)[0]
+    asphericity = u.atoms.asphericity()
+    natoms = len(u.atoms)
+    asphericities.append([molecule, asphericity, natoms])
+
+key = 2 if args.n else 1
+asphericities.sort(key=lambda x: x[key])
+
+header = f"{'molecule':>10s}  {'asph':^7s} {'# atoms':>7s}"
+print(header)
+print('-'*len(header))
+for m, a, n in asphericities:
+    print(f"{m:>10s}  {a:7.5f} {n:7d}")

@@ -1,0 +1,74 @@
+#!/usr/bin/env gnuplot
+
+set encoding iso_8859_1
+set term postscript enhanced color font "Helvetica,20"
+
+set grid back lw 1 lc "black"
+set tics font ",22"
+
+np = 2
+nrep = 3
+ntau = 2
+array proj[np] = ["pet", "pef"]
+array PROJ[np] = ["PET", "PEF"]
+array tau[ntau] = [2, 5]
+
+do for [i=1:10] {
+    set linetype i linewidth 3
+}
+
+do for [i=1:np] {
+    do for [r=1:nrep] {
+        set ylabel "Diffusion Constant (nm^2 / ns)" font ",24"
+        set xlabel "Z position ({\305})" font ",24"
+        set xrange [-20:20]
+
+        set output sprintf("D_figures/%s_co2_%d.eps", proj[i], r)
+        set title sprintf("%s rep %d", PROJ[i], r) font ",28"
+        plot for [tt=1:ntau] sprintf('%s_co2_%d_D.dat', proj[i], r) \
+             using ($1*10):(column(tau[tt]*10+1)) with linespoints \
+             title sprintf("{/Symbol t} = %.1f ns", tau[tt]*1.),\
+             sprintf('%s_co2_%d_D_final.dat', proj[i], r) \
+             using ($1*10):2 with linespoints \
+             title "{/Symbol t} = [1, 10] ns"
+    }
+
+    #set yrange [0:0.25]
+    set yrange [0:0.05]
+    set xrange [-20:20]
+
+    set ylabel "Diffusion Constant (nm^2 / ns)" font ",24"
+    set xlabel "Z position ({\305})" font ",24"
+    set output sprintf("D_figures/%s_co2_avg_sem.eps", proj[i])
+    set title sprintf("Diffusion in %s", PROJ[i]) font ",28"
+    plot for [tt=1:ntau] sprintf("%s_co2_avg.dat", proj[i]) \
+         using ($1*10):(column(tt+1)) with lines linestyle tt title "", \
+         for [tt=1:ntau] sprintf("%s_co2_avg.dat", proj[i]) \
+         using ($1*10):(column(tt+1)):(column(tt+3)) with yerrorbars linestyle tt \
+         title sprintf("{/Symbol t} = %.1f ns", tau[tt]*1.), \
+         sprintf("%s_co2_avg.dat", proj[i]) u ($1*10):6 w lines ls ntau+1 t "", \
+         sprintf("%s_co2_avg.dat", proj[i]) u ($1*10):6:7 w yerrorbars ls ntau+1 \
+         title "{/Symbol t} = [1, 10] ns"
+
+    set output sprintf("D_figures/%s_co2_avg_only.eps", proj[i])
+    set title sprintf("Diffusion in %s", PROJ[i]) font ",28"
+    plot for [tt=1:ntau] sprintf("%s_co2_avg.dat", proj[i]) \
+         using ($1*10):(column(tt+1)) with lines linestyle tt \
+         title sprintf("{/Symbol t} = %.1f ns", tau[tt]*1.), \
+         sprintf("%s_co2_avg.dat", proj[i]) u ($1*10):6 w lines ls ntau+1 \
+         title "{/Symbol t} = [1, 10] ns"
+}
+
+
+#for [i=2:5] 'pet_co2_1_D.dat' using ($1*10):(column(i)*10) \
+#with linespoints title sprintf("PET_1 ({/Symbol t} = 0.%d ns)", i-1),\
+
+        #plot for [j=5:20:5] sprintf('%s_co2_%d_D.dat', proj[i], r) \
+        #     using ($1*10):(column(j+1)) with linespoints \
+        #     title sprintf("({/Symbol t} = %.1f ns)", j/10.),\
+        #     sprintf('%s_co2_%d_D.dat', proj[i], r) \
+        #     using ($1*10):51 with linespoints \
+        #     title sprintf("({/Symbol t} = %.1f ns)", 50/10.),\
+        #     sprintf('%s_co2_%d_D_final.dat', proj[i], r) \
+        #     using ($1*10):2 with linespoints \
+        #     title sprintf("{/Symbol t} = 1.0 ns to 10.0 ns")

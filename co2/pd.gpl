@@ -1,0 +1,18 @@
+#!/usr/bin/env gnuplot --persist
+
+set encoding iso_8859_1
+#set term postscript enhanced color font "Helvetica,18"
+
+set key font ",16"
+set grid back lw 1 lc "black"
+
+set title "CO_2 in PET"
+set ylabel "MSD (nm^2/ns)"
+set xlabel "Lag Time (.1 ns)"
+
+set output "msd.eps"
+
+plot for [i=140:150:2] \
+    'pet_co2_1_MSD.dat' matrix every ::1:i:50:i w l t \
+     sprintf("bin at %.1f {\305}", i*0.1 -15)
+

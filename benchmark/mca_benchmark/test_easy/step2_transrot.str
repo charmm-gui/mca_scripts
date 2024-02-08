@@ -1,0 +1,404 @@
+* rigid-body translation and rotation to check bad contacts
+*
+
+calc nbadmin  = 9999999
+
+calc nxyzmove = 1
+
+calc xmove = 0.0
+calc ymove = 0.0
+calc zmove = 0.0
+
+calc nxyzmovemin = 0
+calc rotxangmin = 0
+calc rotyangmin = 0
+calc rotzangmin = 0
+calc xtranmin = 0
+calc ytranmin = 0
+calc ztranmin = 0
+
+set checkmemb = 0
+set doxytran = 1
+set doxyrot = 1
+if dorestraint eq YES if poltype eq SPOL set checkmemb = 1
+if xrand eq yes if yrand eq yes if zrand eq no set doxytran = 0
+if poltype eq MPOL set doxyrot = 0
+
+!
+! get a bounding sphere for target
+!
+
+coor stat sele target end
+
+! bounding box dimensions and length of diagonal
+calc xmax = ?xmax
+calc ymax = ?ymax
+calc zmax = ?zmax
+calc xmin = ?xmin
+calc ymin = ?ymin
+calc zmin = ?zmin
+calc xlen = @xmax - @xmin
+calc ylen = @ymax - @ymin
+calc zlen = @zmax - @zmin
+calc dlen = sqrt(@xlen**2 + @ylen**2 + @zlen**2)
+
+! center of bounding sphere
+calc bcenx = (@xmax + @xmin) / 2
+calc bceny = (@ymax + @ymin) / 2
+calc bcenz = (@zmax + @zmin) / 2
+
+! center of geometry (used for rotation)
+calc xave = ?xave
+calc yave = ?yave
+calc zave = ?zave
+
+! difference between two centers
+calc cendiffx = abs(@bcenx - @xave)
+calc cendiffy = abs(@bceny - @yave)
+calc cendiffz = abs(@bcenz - @zave)
+calc cendiff = sqrt(@cendiffx**2 + @cendiffy**2 + @cendiffz**2)
+
+! diameter of box representing all possible translation
+calc deldiam = sqrt( 3 * @delxyz**2 )
+
+! radius of bounding sphere that includes all possible translation
+! and rotation about target's geometric center
+calc bsdiam = 2*@cendiff + @dlen + @deldiam
+calc bsrad  = @bsdiam / 2
+
+! must check images if the bounding sphere is bigger than any dimension
+set image
+set doimage = no
+if bsdiam .gt. @xdim set doimage = yes
+if bsdiam .gt. @ydim set doimage = yes
+if bsdiam .gt. @zdim set doimage = yes
+if doimage .eq. yes set image = image
+
+! smallest bounding box that contains the sphere
+calc xmax = @bcenx + @bsrad
+calc ymax = @bceny + @bsrad
+calc zmax = @bcenz + @bsrad
+calc xmin = @bcenx - @bsrad
+calc ymin = @bceny - @bsrad
+calc zmin = @bcenz - @bsrad
+
+!
+! move all atoms except target inside primary box
+!
+
+define prxp sele ( prop X .ge. @xhalf ) .and. .not. target end
+set nprxp = ?nsel
+if nprxp .gt. 0 coor trans xdir -@xdim sele prxp end
+
+define pryp sele ( prop Y .ge. @yhalf ) .and. .not. target end
+set npryp = ?nsel
+if npryp .gt. 0 coor trans ydir -@ydim sele pryp end
+
+define przp sele ( prop Z .ge. @zhalf ) .and. .not. target end
+set nprzp = ?nsel
+if nprzp .gt. 0 coor trans zdir -@zdim sele przp end
+
+define prxn sele ( prop X .le. -@xhalf ) .and. .not. target end
+set nprxn = ?nsel
+if nprxn .gt. 0 coor trans xdir @xdim sele prxn end
+
+define pryn sele ( prop Y .le. -@yhalf ) .and. .not. target end
+set npryn = ?nsel
+if npryn .gt. 0 coor trans ydir @ydim sele pryn end
+
+define przn sele ( prop Z .le. -@zhalf ) .and. .not. target end
+set nprzn = ?nsel
+if nprzn .gt. 0 coor trans zdir @zdim sele przn end
+
+define imxp sele none end
+define imyp sele none end
+define imzp sele none end
+define imxn sele none end
+define imyn sele none end
+define imzn sele none end
+
+set nimxp = 0
+set nimyp = 0
+set nimzp = 0
+set nimxn = 0
+set nimyn = 0
+set nimzn = 0
+
+!
+! recenter the whole cell to the center of the bounding sphere
+!
+if bcenx .gt. 0 then
+    calc xdiff = @bcenx - @xhalf
+    define imxp sele prop X .le. @xdiff end
+    set nimxp = ?nsel
+    if nimxp .gt. 0 coor trans xdir @xdim sele imxp end
+endif
+
+if bceny .gt. 0 then
+    calc ydiff = @bceny - @yhalf
+    define imyp sele prop Y .le. @ydiff end
+    set nimyp = ?nsel
+    if nimyp .gt. 0 coor trans ydir @ydim sele imyp end
+endif
+
+if bcenz .gt. 0 then
+    calc zdiff = @bcenz - @zhalf
+    define imzp sele prop Z .le. @zdiff end
+    set nimzp = ?nsel
+    if nimzp .gt. 0 coor trans zdir @zdim sele imzp end
+endif
+
+if bcenx .lt. 0 then
+    calc xdiff = @bcenx + @xhalf
+    define imxn sele prop X .gt. @xdiff end
+    set nimxn = ?nsel
+    if nimxn .gt. 0 coor trans xdir -@xdim sele imxn end
+endif
+
+if bceny .lt. 0 then
+    calc ydiff = @bceny + @yhalf
+    define imyn sele prop Y .gt. @ydiff end
+    set nimyn = ?nsel
+    if nimyn .gt. 0 coor trans ydir -@ydim sele imyn end
+endif
+
+if bcenz .lt. 0 then
+    calc zdiff = @bcenz + @zhalf
+    define imzn sele prop Z .gt. @zdiff end
+    set nimzn = ?nsel
+    if nimzn .gt. 0 coor trans zdir -@zdim sele imzn end
+endif
+
+! JUNK = heavy atoms within bounding sphere, except target
+define JUNK sele .not. hydrogen .and. .not. target .and. .not. segid *POL* -
+                 .and. point @bcenx @bceny @bcenz cut @bsrad end
+
+! get collisions with other components
+if doimage .eq. yes coor copy comp ! image update breaks bonds
+if @?debug .eq. 1 prnlev 4
+if doimage .eq. yes update imall inbf 0
+coor dist cut @dcut sele target .and. .not. hydrogen end -
+                    sele JUNK end @image
+if @?debug .eq. 1 prnlev 5
+if doimage .eq. yes coor swap ! restore pre-update coordinates
+
+set nbad0 = ?npair
+
+! get collisions with implicit membrane region
+if checkmemb eq 1 then
+    stream polinfo/select_pbc.str exclude
+    define inpbc sele target .and. .not. hydrogen .and. inpbc end
+    incr nbad0 by ?nsel
+endif
+
+if nbad0 gt 1000 then
+    calc initang = 0.0
+    calc delxyz0 = @delxyz
+    calc delxyz  = @delxyz * 1.5
+    calc deldiam = sqrt( 3 * @delxyz**2 )
+    calc bsdiam = 2*@cendiff + @dlen + @deldiam
+    calc bsrad = @bsdiam / 2
+
+    define JUNK sele .not. target .and. .not. hydrogen .and. .not. segid *POL* .and. -
+                     point @bcenx @bceny @bcenz cut @bsrad end
+
+    stream step2_trans.str
+
+    calc delxyz  = @delxyz0
+    calc deldiam = sqrt( 3 * @delxyz**2 )
+    calc bsdiam = 2*@cendiff + @dlen + @deldiam
+    calc bsrad = @bsdiam / 2
+
+    define JUNK sele .not. target .and. .not. hydrogen .and. .not. segid *POL* .and. -
+                     point @bcenx @bceny @bcenz cut @bsrad end
+
+    if @?debug .eq. 1 prnlev 4
+    coor dist cut @dcut sele target .and. .not. hydrogen end -
+                        sele JUNK end
+    if @?debug .eq. 1 prnlev 5
+
+    set nbad0 = ?npair
+
+    if nbadmin lt @nbadmax set nbadmin = @nbadmax
+endif
+
+if nbad0 lt @nbadmin set nbadmin = @nbad0
+if nbad0 eq 0 goto next_sphere
+
+if nbad0 lt @nbadmax then
+    calc initang  = 0.0
+    calc finalang = 0.0
+endif
+
+if doimage .eq. yes then
+    crystal free
+    crystal define @xtltype @A @B @C @alpha @beta @gamma
+
+    open read unit 10 card name crystal_image.str
+    crystal read unit 10 card
+    close unit 10
+endif
+
+label do_xyzmove
+    if doxytran eq 0 then
+        if nxyzmove .eq. 2 incr xmove by @delxyz
+        if nxyzmove .eq. 3 incr ymove by @delxyz
+        if nxyzmove .eq. 4 decr xmove by @delxyz
+        if nxyzmove .eq. 5 decr xmove by @delxyz
+        if nxyzmove .eq. 6 decr ymove by @delxyz
+        if nxyzmove .eq. 7 decr ymove by @delxyz
+        if nxyzmove .eq. 8 incr xmove by @delxyz
+        if nxyzmove .eq. 9 incr xmove by @delxyz
+    else
+        if nxyzmove .eq. 2  incr zmove by @delxyz
+        if nxyzmove .eq. 3  calc zmove = @zmove - 2 * @delxyz
+        if nxyzmove .eq. 4  incr ymove by @delxyz
+        if nxyzmove .eq. 5  incr zmove by @delxyz
+        if nxyzmove .eq. 6  incr zmove by @delxyz
+        if nxyzmove .eq. 7  incr xmove by @delxyz
+        if nxyzmove .eq. 8  decr ymove by @delxyz
+        if nxyzmove .eq. 9  decr zmove by @delxyz
+        if nxyzmove .eq. 10 incr ymove by @delxyz
+        if nxyzmove .eq. 11 decr zmove by @delxyz
+        if nxyzmove .eq. 12 decr ymove by @delxyz
+        if nxyzmove .eq. 13 decr ymove by @delxyz
+        if nxyzmove .eq. 14 decr xmove by @delxyz
+        if nxyzmove .eq. 15 incr zmove by @delxyz
+        if nxyzmove .eq. 16 incr xmove by @delxyz
+        if nxyzmove .eq. 17 incr zmove by @delxyz
+        if nxyzmove .eq. 18 decr xmove by @delxyz
+        if nxyzmove .eq. 19 decr xmove by @delxyz
+        if nxyzmove .eq. 20 incr ymove by @delxyz
+        if nxyzmove .eq. 21 decr zmove by @delxyz
+        if nxyzmove .eq. 22 decr ymove by @delxyz
+        if nxyzmove .eq. 23 decr zmove by @delxyz
+        if nxyzmove .eq. 24 incr ymove by @delxyz
+        if nxyzmove .eq. 25 incr ymove by @delxyz
+        if nxyzmove .eq. 26 incr zmove by @delxyz
+        if nxyzmove .eq. 27 incr zmove by @delxyz
+    endif
+
+    calc xcen = @xave + @xmove
+    calc ycen = @yave + @ymove
+    calc zcen = @zave + @zmove
+
+    coor trans xdir @xmove ydir @ymove zdir @zmove sele target end
+
+    calc rotxang = @initang
+    if doxyrot eq 1 -
+    coor rotate xdir 1.0 xcen @xcen ycen @ycen zcen @zcen phi @initang sele target end
+
+    label do_rotx
+        if doxyrot eq 1 -
+        if rotxang ne @initang coor rotate xdir 1.0 xcen @xcen ycen @ycen zcen @zcen phi @delang sele target end
+
+        calc rotyang = @initang
+        if doxyrot eq 1 -
+        coor rotate ydir 1.0 xcen @xcen ycen @ycen zcen @zcen phi @initang sele target end
+
+        label do_roty
+            if doxyrot eq 1 -
+            if rotyang ne @initang coor rotate ydir 1.0 xcen @xcen ycen @ycen zcen @zcen phi @delang sele target end
+
+            calc rotzang = @initang
+            coor rotate zdir 1.0 xcen @xcen ycen @ycen zcen @zcen phi @initang sele target end
+
+            label do_rotz
+                if rotzang ne @initang coor rotate zdir 1.0 xcen @xcen ycen @ycen zcen @zcen phi @delang sele target end
+
+                ! get collisions with other components
+                if doimage .eq. yes coor copy comp ! image update breaks bonds
+                if @?debug .eq. 1 prnlev 4
+                if doimage .eq. yes update imall inbf 0
+                coor dist cut @dcut sele target .and. .not. hydrogen end -
+                                    sele JUNK end @image
+                if @?debug .eq. 1 prnlev 5
+                if doimage .eq. yes coor swap ! restore pre-update coordinates
+                set nbadthis = ?npair
+
+                ! get collisions with implicit membrane region(s)
+                if checkmemb eq 1 then
+                    stream polinfo/select_pbc.str exclude
+                    define inpbc sele target .and. .not. hydrogen .and. inpbc end
+                    increase nbadthis by ?nsel
+                endif
+
+                if nbadthis lt @nbadmin then
+                    calc nbadmin = @nbadthis
+                    calc xtranmin = @xmove
+                    calc ytranmin = @ymove
+                    calc ztranmin = @zmove
+                    calc nxyzmovemin = @nxyzmove
+                    calc rotxangmin = @rotxang
+                    calc rotyangmin = @rotyang
+                    calc rotzangmin = @rotzang
+                endif
+
+                write title unit 51
+                *@typeind @sorti @cind @nxyzmove @rotxang @rotyang @rotzang @nbadthis @nbadmin
+                *
+
+                if nbadmin le @nbadmax goto next_sphere
+
+                incr rotzang by @delang
+                if rotzang le @finalang goto do_rotz
+                decr rotzang by @delang
+                coor rotate zdir 1.0 xcen @xcen ycen @ycen zcen @zcen phi -@rotzang sele target end
+
+            incr rotyang by @delang
+            if doxyrot eq 1 if rotyang le @finalang goto do_roty
+            decr rotyang by @delang
+            if poltype ne MPOL coor rotate ydir 1.0 xcen @xcen ycen @ycen zcen @zcen phi -@rotyang sele target end
+
+        incr rotxang by @delang
+        if doxyrot eq 1 if rotxang le @finalang goto do_rotx
+        decr rotxang by @delang
+        if doxyrot eq 1 coor rotate xdir 1.0 xcen @xcen ycen @ycen zcen @zcen phi -@rotxang sele target end
+
+    coor trans xdir -@xmove ydir -@ymove zdir -@zmove sele target end
+
+    incr nxyzmove
+    if nxyzmove le 9 goto do_xyzmove
+    if doxytran eq 1 if nxyzmove le 27 goto do_xyzmove
+
+! use orientation with minimum bad contacts
+calc rotxang = @rotxangmin - @rotxang
+calc rotyang = @rotyangmin - @rotyang
+calc rotzang = @rotzangmin - @rotzang
+
+if doxyrot eq 1 coor rotate xcen @xave ycen @yave zcen @zave xdir 1.0 phi @rotzang sele target end
+if doxyrot eq 1 coor rotate xcen @xave ycen @yave zcen @zave ydir 1.0 phi @rotyang sele target end
+coor rotate xcen @xave ycen @yave zcen @zave zdir 1.0 phi @rotxang sele target end
+
+coor trans xdir @xtranmin ydir @ytranmin zdir @ztranmin sele target end
+
+label next_sphere
+
+if nimzn .gt. 0 coor trans zdir @zdim sele imzn end
+if nimyn .gt. 0 coor trans ydir @ydim sele imyn end
+if nimxn .gt. 0 coor trans xdir @xdim sele imxn end
+if nimzp .gt. 0 coor trans zdir -@zdim sele imzp end
+if nimyp .gt. 0 coor trans ydir -@ydim sele imyp end
+if nimxp .gt. 0 coor trans xdir -@xdim sele imxp end
+
+if nprzn .gt. 0 coor trans zdir -@zdim sele przn end
+if npryn .gt. 0 coor trans ydir -@ydim sele pryn end
+if nprxn .gt. 0 coor trans xdir -@xdim sele prxn end
+if nprzp .gt. 0 coor trans zdir @zdim sele przp end
+if npryp .gt. 0 coor trans ydir @ydim sele pryp end
+if nprxp .gt. 0 coor trans xdir @xdim sele prxp end
+
+! move back inside box
+calc xcen = @xave + @xtranmin
+calc ycen = @yave + @ytranmin
+calc zcen = @zave + @ztranmin
+
+if xcen lt -@xhalf coor trans xdir  @xdim sele target end
+if xcen gt  @xhalf coor trans xdir -@xdim sele target end
+if ycen lt -@yhalf coor trans ydir  @ydim sele target end
+if ycen gt  @yhalf coor trans ydir -@ydim sele target end
+if zcen lt -@zhalf coor trans zdir  @zdim sele target end
+if zcen gt  @zhalf coor trans zdir -@zdim sele target end
+
+if doimage .eq. yes crystal free
+

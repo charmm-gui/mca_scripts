@@ -1,0 +1,19 @@
+* Renames segments from modified PSF according to Multicomponent Assembler
+* naming scheme.
+* Original PSF: 6y3g.psf
+*
+
+rename segid HAA@IN1 select segid HAA end
+rename segid HAB@IN1 select segid HAB end
+rename segid HAC@IN1 select segid HAC end
+rename segid HAD@IN1 select segid HAD end
+rename segid HAE@IN1 select segid HAE end
+rename segid HAF@IN1 select segid HAF end
+rename segid HAG@IN1 select segid HAG end
+rename segid HAH@IN1 select segid HAH end
+rename segid HAI@IN1 select segid HAI end
+rename segid HAJ@IN1 select segid HAJ end
+rename segid HAK@IN1 select segid HAK end
+rename segid HAL@IN1 select segid HAL end
+rename segid RAA@IN1 select segid RAA end
+

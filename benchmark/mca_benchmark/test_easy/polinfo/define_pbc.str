@@ -1,0 +1,8 @@
+* Defines pbc variables containing position and length of XY periodic and
+* membrane exclusion regions.
+* Usage: stream polinfo/define_pbc.str
+*
+
+calc npbcz     =   0 ! includes membrane region, if any
+calc pbcztot   = 0 ! total width occupied by periodic components
+calc pbczextot = 0 ! "" + excluded above/below

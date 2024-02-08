@@ -1,0 +1,239 @@
+* Count contacts between given selections
+*
+
+DIMENS CHSIZE 5000000 MAXRES 5000000 MAXGRP 5000000
+
+system "pwd"
+
+if @?base .eq. 0 stop     ! missing arg: base
+if @?trajprefix .eq. 0 stop ! missing arg: trajprefix
+
+if @?psf .eq. 0 set psf = @base.psf
+if @?crd .eq. 0 set crd = @base.crd
+if @?sysinfo .eq. 0 set sysinfo = @base.str
+
+if @?cntmin  .eq. 0 set cntmin = 1
+if @?cntmax  .eq. 0 set cntmin = 1000
+if @?trajdir .eq. 0 set trajdir = openmm
+
+! output suffix, to allow parallel jobs
+if @?suffix .eq. 0 set suffix
+
+prnlev 0
+wrnlev 0
+stream toppar.str
+wrnlev 5
+prnlev 5
+
+read psf  card name @psf
+read coor card name @crd
+
+stream @sysinfo
+stream analysis/settings.str
+
+open read unit 10 card name crystal_image.str
+crystal define @xtltype @A @B @C @alpha @beta @gamma
+crystal read unit 10 card
+close unit 10
+
+image byseg select .not. segid SV* .and. .not. segid IONS end
+
+set cnt = @cntmin
+set trajunit = 11
+set tcnt = 1
+
+set outunit = 12
+set outfile = analysis/contact.dat@suffix
+open unit @outunit name @outfile write card
+write title unit @outunit
+*#time pair P(contact)
+*
+
+! get the number of selections to loop through
+set nsels = 1
+label getnsels
+    if @?s@@nsels .eq. 1 then
+        incr nsels
+        goto getnsels
+    else
+        decr nsels
+    endif
+
+set membname = NONE
+set membpair = NONE_NONE
+
+! loop through selection pairs
+set i = 1
+set npairs = 0
+label writeheader1
+    set j = @i
+
+    ! p1: first segment in pair
+    set p1 = @s@@i
+
+    if p1 .eq. MEMB set membname = MEMB
+    if p1 .eq. H* set membname = H*
+    if membname .ne. NONE then
+        set membpair = @{membname}_@{membname}
+    endif
+
+    if p1 .ne. @membname then
+        ! first copy of p1
+        set p11 = @{p1}1
+        define p1k select segid @p11 end
+        calc nat@i = ?NSEL  ! number of atoms per copy
+
+        if nat@i .eq. 0 stop ! selection failed
+
+        define p1 select segid @p1* end
+        calc nc@i = ?NSEL / @nat@@i ! number of copies
+
+        if nat@i .eq. 0 stop ! selection failed
+    else
+        ! by definition there is only one MEMB segment
+        define p1k select segid @p1 end
+        set nat@i = ?NSEL
+        set nc@i = 1
+
+        if nat@i .eq. 0 stop ! selection failed
+    endif
+
+    label writeheader2
+        set p2 = @s@@j
+        set pair = @p1_@p2
+
+        ! skip MEMB_MEMB interaction b/c they're not important
+        if pair .ne. @membpair then
+            incr npairs
+        endif
+
+        incr j
+        if j .le. @nsels goto writeheader2
+    incr i
+    if i .le. @nsels goto writeheader1
+
+set t0 = NONE
+label opentrj
+    set trajfile = @trajdir/@{trajprefix}_@cnt.dcd
+
+    open read unit @trajunit file name @trajfile
+    traj query unit @trajunit
+
+    calc nframes = ?NFILE
+    calc delta = ?DELTA * ?SKIP
+
+    if t0 .eq. NONE -
+    calc t0 = @cntmin - 1
+
+    ! round delta to nearest picosecond to fix precision errors
+    calc diff = @delta - INT( @delta )
+    calc delta = INT( @delta )
+    if diff .ge. 0.5 incr delta
+
+    calc delta = @delta / 1000 ! ps -> ns
+
+    calc skip = ?SKIP
+    calc begin = ?START
+
+    traj iread @trajunit nread 1 skip @skip begin @begin
+
+    calc cmt = 1
+    label readtrj
+
+        traj read
+        calc time = @t0 + @tcnt * @delta  ! ns
+
+        update imall imgfrq 1
+
+        set i = 1
+        set pairindex = 1
+        label pair1
+            set j = @i
+            label pair2
+                set p1 = @s@@i
+                set p2 = @s@@j
+                set pair = @p1_@p2
+
+                ! count # copies in contact this frame
+                set ncontacts = 0
+
+                if p1 .ne. @membname then
+                    if p1 .eq. @p2 then
+                        ! contacts only count between copies of self, not within own copy
+                        define p1 select segid @p1* end
+
+                        set k = 1
+                        label pairpair
+                            define p1k    select segid @p1@k .and. .not. hydrogen end
+                            define p1notk select segid @p1* .and. .not. hydrogen -
+                                          .and. .not. p1k end
+
+                            coor mindist select p1k end select p1notk end images
+                            set mindist = ?MIND
+
+                            if mindist .le. @dcut incr ncontacts
+
+                            incr k
+                            if k .le. @nc@@i goto pairpair
+
+                        ! interaction probability (k - 1 = number of pairs)
+                        calc pcontact = @ncontacts / ( @k - 1 )
+                        write title unit @outunit
+                        *@time @pair @pcontact
+                        *
+                    else 
+                        ! count contacts between each copy of p1 with a copy of p2
+                        set k = 1
+                        set nkl = 0
+                        label pair1copies
+                            define p1 select segid @p1@k .and. .not. hydrogen end
+                            set nk = @nc@@i
+
+                            set l = 1
+                            label pair2copies
+                                set nl = @nc@@j
+
+                                set p2sel = @p2
+                                if p2 .ne. @membname set p2sel = @p2@l
+                                define p2 select segid @p2sel .and. .not. hydrogen end
+
+                                coor mindist select p1 end select p2 end images
+                                set mindist = ?MIND
+
+                                if mindist .le. @dcut incr ncontacts
+
+                                incr l
+                                incr nkl
+                                if l .le. @nl goto pair2copies
+
+                            incr k
+                            if k .le. @nk goto pair1copies
+
+                        ! interaction probability (nkl = number of pairs between p1 and p2)
+                        calc pcontact = @ncontacts / @nkl
+                        write title unit @outunit
+                        *@time @pair @pcontact
+                        *
+                    endif
+                endif
+
+                incr j
+                incr pairindex
+
+                if j .le. @nsels goto pair2
+
+            incr i
+            if i .le. @nsels goto pair1
+
+        incr tcnt
+        incr cmt
+
+        if cmt .le. @nframes goto readtrj
+
+    close unit @trajunit
+
+    incr cnt
+    if cnt .le. @cntmax goto opentrj
+
+close unit @outunit
+

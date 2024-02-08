@@ -1,0 +1,68 @@
+#!/usr/bin/env gnuplot
+
+set term postscript enhanced color font "Helvetica,20"
+set encoding iso_8859_1
+
+set ylabel "Number Density" font ",24"
+set xlabel "Z ({\305})" font ",24"
+set tics font ",22"
+
+nd = 5
+array begins[nd] = [  0,    0,  6666, 13333,     0]
+array ends[nd]   = [100, 6666, 13333, 20000, 20000]
+
+np = 2
+array titles = ["PET", "PEF"]
+array projects = ["pet", "pef"]
+
+#set yrange [0:0.0045]
+set yrange [0:0.009]
+set xrange [0:55]
+
+# I can probably remove this section
+do for [j=1:np] {
+    set title titles[j]
+    set output sprintf("density_out/%s.eps", projects[j])
+    plot for [i=1:nd] sprintf("density/%s_co2_density_z.%d.%d.plo", \
+        projects[j], begins[i], ends[i]) \
+        using 1:2:3 title sprintf("%.0f-%.0f ns", begins[i]/10, ends[i]/10) \
+        with yerrorbars ls i, \
+        for [i=1:nd] '' with lines ls i t ''
+}
+
+# plot plastics separately by time
+do for [i=1:nd] {
+    do for [j=1:np] {
+        set title sprintf("%s + CO_2 (%.0f - %.0f ns)", \
+                          titles[j], begins[i]/10, ends[i]/10)
+        set output sprintf("density_out/%s_%d.eps", projects[j], i)
+        plot sprintf("density/%s_co2_density_z.%d.%d.plo", \
+            projects[j], begins[i], ends[i]) \
+            using 1:2:3 with yerrorbars ls 1 title titles[j], \
+            '' u 1:2:3 with lines ls 1 lw 2 t '', \
+            '' u 1:4:5 w yerrorbars ls 2 lw 2 t "CO_2", \
+            '' u 1:4:5 w l ls 2 lw 2 t ''
+    }
+}
+
+set size square
+set key left font ",20"
+
+# plot plastics together by time
+do for [i=1:nd] {
+    set title sprintf("%.0f - %.0f ns", \
+                      begins[i]/10, ends[i]/10) font ",28"
+    set output sprintf("density_out/both_%d.eps", i)
+
+    array infiles[np]
+    array co2s[np]
+    do for [j=1:np] {
+        infiles[j] = sprintf("density/%s_co2_density_z.%d.%d.plo", \
+                             projects[j], begins[i], ends[i])
+        co2s[j] = sprintf("CO_2 (%s)", titles[j])
+    }
+    plot for [j=1:np] infiles[j] u ($1-(54.2*(j-1))/22):2:3 w yerrorbars ls j lw 3 t titles[j], \
+         for [j=1:np] infiles[j] u ($1-(54.2*(j-1))/22):2:3 w lines ls j lw 3 t '', \
+         for [j=1:np] infiles[j] u ($1-(54.2*(j-1))/22):4:5 w yerrorbars ls j+2 lw 3 t co2s[j], \
+         for [j=1:np] infiles[j] u ($1-(54.2*(j-1))/22):4:5 w l ls j+2 lw 3 t ''
+}

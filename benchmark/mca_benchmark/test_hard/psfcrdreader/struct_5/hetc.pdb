@@ -1,0 +1,22 @@
+REMARK SET STRUCT_RADIUS_5 = 28.088941                                                
+REMARK SET STRUCT_MOLVOL_5 = 21536.3379                                               
+REMARK SET STRUCT_NSEG_5 = 13                                                         
+REMARK SET STRUCT_NRES_5 = 87                                                         
+REMARK SET STRUCT_NCHARGE_5 = -56                                                     
+REMARK SET STRUCT_XLEN_5 = 94.1213846                                                 
+REMARK SET STRUCT_MASS_5 = 24813.2876                                                 
+REMARK SET STRUCT_MEMB_VOL_5 = 12023.8024                                             
+REMARK SET STRUCT_MEMB_RADIUS_5 = 17.4027109                                          
+REMARK   DATE:    11/30/23     16: 9:49      CREATED BY USER: apache                  
+ATOM   2450  C   GUAN  103     -12.403 -46.823 -15.829  1.00  0.00      HETC
+ATOM   2451  N1  GUAN  103     -11.382 -46.466 -16.811  1.00  0.00      HETC
+ATOM   2452  H11 GUAN  103     -11.652 -46.112 -17.707  1.00  0.00      HETC
+ATOM   2453  H12 GUAN  103     -10.413 -46.576 -16.588  1.00  0.00      HETC
+ATOM   2454  N2  GUAN  103     -12.069 -47.540 -14.599  1.00  0.00      HETC
+ATOM   2455  H21 GUAN  103     -11.112 -47.667 -14.339  1.00  0.00      HETC
+ATOM   2456  H22 GUAN  103     -12.798 -47.902 -14.018  1.00  0.00      HETC
+ATOM   2457  N3  GUAN  103     -13.591 -46.508 -16.052  1.00  0.00      HETC
+ATOM   2458  H31 GUAN  103     -13.855 -46.157 -16.951  1.00  0.00      HETC
+ATOM   2459  H32 GUAN  103     -14.279 -46.607 -15.333  1.00  0.00      HETC
+TER    2491      GUAN   103
+END

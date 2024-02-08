@@ -1,0 +1,24 @@
+    OLD_NAME NEW_NAME
+1mjc.psf
+    PROA     PAA     
+1vii.psf
+    PROA     PAB     
+2hac.psf
+    PROA     PAC     
+    PROB     PAD     
+3gb1.psf
+    PROA     PAE     
+6y3g.psf
+    HETA     HAA     
+    HETB     HAB     
+    HETC     HAC     
+    HETD     HAD     
+    HETE     HAE     
+    HETF     HAF     
+    HETG     HAG     
+    HETH     HAH     
+    HETI     HAI     
+    HETJ     HAJ     
+    HETK     HAK     
+    HETL     HAL     
+    RNAA     RAA     

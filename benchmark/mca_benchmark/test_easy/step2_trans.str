@@ -1,0 +1,109 @@
+* rigid-body translation (no rotation) to check bad contacts
+*
+
+calc nbadmin  = 9999999
+
+calc nxyzmove = 1
+
+calc xmove = 0.0
+calc ymove = 0.0
+calc zmove = 0.0
+
+label do_xyzmove
+    if doxytran eq 0 then
+        if nxyzmove .eq. 2 incr xmove by @delxyz
+        if nxyzmove .eq. 3 incr ymove by @delxyz
+        if nxyzmove .eq. 4 decr xmove by @delxyz
+        if nxyzmove .eq. 5 decr xmove by @delxyz
+        if nxyzmove .eq. 6 decr ymove by @delxyz
+        if nxyzmove .eq. 7 decr ymove by @delxyz
+        if nxyzmove .eq. 8 incr xmove by @delxyz
+        if nxyzmove .eq. 9 incr xmove by @delxyz
+    else
+        if nxyzmove .eq. 2  incr zmove by @delxyz
+        if nxyzmove .eq. 3  calc zmove = @zmove - 2 * @delxyz
+        if nxyzmove .eq. 4  incr ymove by @delxyz
+        if nxyzmove .eq. 5  incr zmove by @delxyz
+        if nxyzmove .eq. 6  incr zmove by @delxyz
+        if nxyzmove .eq. 7  incr xmove by @delxyz
+        if nxyzmove .eq. 8  decr ymove by @delxyz
+        if nxyzmove .eq. 9  decr zmove by @delxyz
+        if nxyzmove .eq. 10 incr ymove by @delxyz
+        if nxyzmove .eq. 11 decr zmove by @delxyz
+        if nxyzmove .eq. 12 decr ymove by @delxyz
+        if nxyzmove .eq. 13 decr ymove by @delxyz
+        if nxyzmove .eq. 14 decr xmove by @delxyz
+        if nxyzmove .eq. 15 incr zmove by @delxyz
+        if nxyzmove .eq. 16 incr xmove by @delxyz
+        if nxyzmove .eq. 17 incr zmove by @delxyz
+        if nxyzmove .eq. 18 decr xmove by @delxyz
+        if nxyzmove .eq. 19 decr xmove by @delxyz
+        if nxyzmove .eq. 20 incr ymove by @delxyz
+        if nxyzmove .eq. 21 decr zmove by @delxyz
+        if nxyzmove .eq. 22 decr ymove by @delxyz
+        if nxyzmove .eq. 23 decr zmove by @delxyz
+        if nxyzmove .eq. 24 incr ymove by @delxyz
+        if nxyzmove .eq. 25 incr ymove by @delxyz
+        if nxyzmove .eq. 26 incr zmove by @delxyz
+        if nxyzmove .eq. 27 incr zmove by @delxyz
+    endif
+
+    calc xcen = @xave + @xmove
+    calc ycen = @yave + @ymove
+    calc zcen = @zave + @zmove
+
+    coor trans xdir @xmove ydir @ymove zdir @zmove sele target end
+
+    ! get collisions
+    if doimage .eq. yes coor copy comp ! image update breaks bonds
+    if @?debug .eq. 1 prnlev 4
+    if doimage .eq. yes update imall inbf 0
+    coor dist cut @dcut sele target .and. .not. hydrogen end -
+                        sele JUNK end @image
+    if @?debug .eq. 1 prnlev 5
+    if doimage .eq. yes coor swap ! restore pre-update coordinates
+    set nbadthis = ?npair
+
+    ! get collisions with implicit membrane region
+    if checkmemb eq 1 then
+        stream polinfo/select_pbc.str exclude
+        define inpbc sele target .and. .not. hydrogen .and. inpbc end
+        increase nbadthis by ?nsel
+    endif
+
+    if nbadthis lt @nbadmin then
+        calc nbadmin = @nbadthis
+        calc xtranmin = @xmove
+        calc ytranmin = @ymove
+        calc ztranmin = @zmove
+        calc nxyzmovemin = @nxyzmove
+    endif
+
+    write title unit 51
+    *@typeind @sorti @cind @nxyzmove @nbadthis @nbadmin
+    *
+
+    if nbadmin le @nbadmax goto next_sphere
+
+    coor trans xdir -@xmove ydir -@ymove zdir -@zmove sele target end
+
+    incr nxyzmove
+    if nxyzmove le 9 goto do_xyzmove
+    if doxytran eq 1 if nxyzmove le 27 goto do_xyzmove
+
+coor trans xdir @xtranmin ydir @ytranmin zdir @ztranmin sele target end
+
+! move back inside box
+calc xcen = @xave + @xtranmin
+calc ycen = @yave + @ytranmin
+calc zcen = @zave + @ztranmin
+
+if xcen lt -@xhalf coor trans xdir  @xdim sele target end
+if xcen gt  @xhalf coor trans xdir -@xdim sele target end
+if ycen lt -@yhalf coor trans ydir  @ydim sele target end
+if ycen gt  @yhalf coor trans ydir -@ydim sele target end
+if zcen lt -@zhalf coor trans zdir  @zdim sele target end
+if zcen gt  @zhalf coor trans zdir -@zdim sele target end
+
+label next_sphere
+

@@ -1,0 +1,13 @@
+REMARK SET STRUCT_RADIUS_5 = 28.088941                                                
+REMARK SET STRUCT_MOLVOL_5 = 21536.3379                                               
+REMARK SET STRUCT_NSEG_5 = 13                                                         
+REMARK SET STRUCT_NRES_5 = 87                                                         
+REMARK SET STRUCT_NCHARGE_5 = -56                                                     
+REMARK SET STRUCT_XLEN_5 = 94.1213846                                                 
+REMARK SET STRUCT_MASS_5 = 24813.2876                                                 
+REMARK SET STRUCT_MEMB_VOL_5 = 12023.8024                                             
+REMARK SET STRUCT_MEMB_RADIUS_5 = 17.4027109                                          
+REMARK   DATE:    11/30/23     16: 9:49      CREATED BY USER: apache                  
+ATOM   2472  CAL CAL   107     -10.096 -48.215  -4.011  1.00  0.00      HETG
+TER    2491      CAL    107
+END

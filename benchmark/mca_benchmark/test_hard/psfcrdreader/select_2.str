@@ -1,0 +1,8 @@
+* Defines "target" selection, which selects all atoms which originated from
+* this PSF. First argument restricts selection to the given copy number.
+* Use "*" to select all copies.
+* Original PSF: 1vii.psf
+*
+
+define target select none end
+define target select target .or. segid PAB@IN1 end

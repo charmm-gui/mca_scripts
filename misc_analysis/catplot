@@ -1,0 +1,82 @@
+#!/usr/bin/env python
+import argparse
+import os
+import sys
+
+def regular_file(filename):
+    if not os.path.exists(filename):
+        raise argparse.ArgumentTypeError(f"Error: No such file: '{filename}'")
+
+    if os.path.isdir(filename):
+        raise argparse.ArgumentTypeError(f"Error: '{filename}' is a directory")
+
+    if not os.path.isfile(filename):
+        raise argparse.ArgumentTypeError(f"Error: '{filename}' not a regular file")
+
+    return filename
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-f', '--format', help="numpy output format string")
+parser.add_argument('-o', '--output', nargs=1, default=[sys.stdout],
+    help="save file here instead of printing to stdout")
+parser.add_argument('filename', type=regular_file, nargs='+')
+
+args = parser.parse_args()
+outfile = args.output[0]
+
+try:
+    import numpy as np
+except ImportError:
+    print("Could not import numpy.", file=sys.stderr)
+    print("To ensure it is available in your terminal, try this command:", file=sys.stderr)
+    print("module load python/3.8.6 numpy", file=sys.stderr)
+    sys.exit(-1)
+
+data = np.concatenate([np.loadtxt(filename) for filename in args.filename])
+
+###############################################################
+# TODO: remove below to make this script generally applicable #
+#       alternatively, make them command-line options.        #
+###############################################################
+
+#
+# for correcting time cycling
+#
+accum_time = 0.
+last_time = 0.
+for index in range(data.shape[0]):
+    time = data[index,0]
+    if time < last_time:
+        accum_time += last_time
+    data[index,0] = accum_time + time
+    last_time = time
+
+#
+# to include the header, but only once
+#
+with open(args.filename[0]) as plotfile:
+    header = []
+    for line in plotfile:
+        line = line.strip()
+        # include only lines starting with '#'
+        if not line.startswith('#'):
+            break
+
+        # remove '#' plus leading whitespace
+        for pos, char in enumerate(line):
+            if char not in "# \t":
+                break
+
+        header.append(line[pos:])
+
+#
+# output formatting because the default is terrible, but
+# this only works for the contact plot!
+#
+args.format = '%8.1f '+' '.join(['%4.0f']*(data.shape[1]-1))
+
+out_args = {'header': os.linesep.join(header)}
+if args.format:
+    out_args['fmt'] = args.format
+
+np.savetxt(outfile, data, **out_args)

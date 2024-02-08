@@ -1,0 +1,26 @@
+REMARK SET STRUCT_RADIUS_5 = 28.088941                                                
+REMARK SET STRUCT_MOLVOL_5 = 21536.3379                                               
+REMARK SET STRUCT_NSEG_5 = 13                                                         
+REMARK SET STRUCT_NRES_5 = 87                                                         
+REMARK SET STRUCT_NCHARGE_5 = -56                                                     
+REMARK SET STRUCT_XLEN_5 = 94.1213846                                                 
+REMARK SET STRUCT_MASS_5 = 24813.2876                                                 
+REMARK SET STRUCT_MEMB_VOL_5 = 12023.8024                                             
+REMARK SET STRUCT_MEMB_RADIUS_5 = 17.4027109                                          
+REMARK   DATE:    11/30/23     16: 9:49      CREATED BY USER: apache                  
+ATOM   2477  C1  MGLY  112     -34.687 -33.943  12.008  1.00  0.00      HETL
+ATOM   2478  H11 MGLY  112     -34.510 -32.848  12.080  1.00  0.00      HETL
+ATOM   2479  H12 MGLY  112     -33.721 -34.481  12.109  1.00  0.00      HETL
+ATOM   2480  O1  MGLY  112     -35.236 -34.230  10.729  1.00  0.00      HETL
+ATOM   2481  HO1 MGLY  112     -35.521 -35.147  10.763  1.00  0.00      HETL
+ATOM   2482  C2  MGLY  112     -35.626 -34.377  13.112  1.00  0.00      HETL
+ATOM   2483  H2  MGLY  112     -36.516 -33.712  13.132  1.00  0.00      HETL
+ATOM   2484  O2  MGLY  112     -36.056 -35.721  12.884  1.00  0.00      HETL
+ATOM   2485  HO2 MGLY  112     -35.259 -36.256  12.880  1.00  0.00      HETL
+ATOM   2486  C3  MGLY  112     -34.997 -34.256  14.482  1.00  0.00      HETL
+ATOM   2487  H31 MGLY  112     -34.757 -33.191  14.688  1.00  0.00      HETL
+ATOM   2488  H32 MGLY  112     -34.064 -34.858  14.516  1.00  0.00      HETL
+ATOM   2489  O3  MGLY  112     -35.877 -34.726  15.494  1.00  0.00      HETL
+ATOM   2490  HO3 MGLY  112     -36.515 -35.289  15.049  1.00  0.00      HETL
+TER    2491      MGLY   112
+END

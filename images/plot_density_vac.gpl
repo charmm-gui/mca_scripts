@@ -1,0 +1,18 @@
+#!/usr/bin/env gnuplot
+
+set term postscript enhanced color font "Helvetica,20"
+set encoding iso_8859_1
+
+set ylabel "Number Density"
+set xlabel "Z ({\305})"
+
+array begins[4] = [   0, 1666, 3333,    0]
+array ends[4]   = [1666, 3333, 5000, 5000]
+
+do for [project in "PET PEF"] {
+    set title project
+    set output sprintf("density_out/%s.eps", project)
+    plot for [i=1:4] sprintf("density/pet_vac_density_z.%d.%d.plo", begins[i], ends[i]) \
+        title sprintf("%.0f-%0.f {/Symbol m}s", begins[i]/1000, ends[i]/1000) \
+        with yerrorbars ls i, for [i=1:4] '' with lines ls i t ''
+}

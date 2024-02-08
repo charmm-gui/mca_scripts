@@ -1,0 +1,61 @@
+#!/usr/bin/env gnuplot
+
+set term pngcairo color enhanced font "Arial,12"
+
+array systype[4] = ['axolemma', 'ha', 'membrane', 'peo']
+array pretty[4] = ['Axolemma', 'HA', 'CHL1/POPC/PSM', 'EE_{37}EO_{40}']
+array replica[3] = [5, 10, 30]
+
+set yrange [:100]
+
+infile(sys, r) = sprintf('cluster_in/%s_%d_cluster.plo', \
+    systype[sys], replica[r])
+ptitle(sys, r) = sprintf('%s %d', pretty[sys], replica[r])
+
+# === first plot as % of clusters
+
+set logscale xy
+set ylabel "% of Clusters"
+set xlabel "Cluster Size"
+
+set output 'cluster_out/all_cluster.png'
+plot for [sys=1:4] for [r=1:3] \
+    infile(sys, r) using 1:($2 == 0 ? 0.001 : $2*100) with lines \
+    title ptitle(sys, r)
+
+# plot by system type
+do for [sys=1:4] {
+    set output sprintf('cluster_out/cluster_%s.png', systype[sys])
+    plot for [r=1:3] infile(sys, r) using 1:($2 == 0 ? 0.001 : $2*100) \
+    with lines title ptitle(sys, r)
+}
+
+# plot by replica
+do for [r=1:3] {
+    set output sprintf('cluster_out/cluster_%d.png', replica[r])
+    plot for [sys=1:4] infile(sys, r) using 1:($2 == 0 ? 0.001 : $2*100) \
+    with lines title ptitle(sys, r)
+}
+
+# === next plot as % of proteins (i.e., chance of protein appearing in cluster of size X)
+
+set ylabel "% of Proteins"
+
+set output 'cluster_out/all_protein.png'
+plot for [sys=1:4] for [r=1:3] \
+    infile(sys, r) using 1:($3 == 0 ? 0.0001 : $3*100) with lines \
+    title ptitle(sys, r)
+
+# plot by system type
+do for [sys=1:4] {
+    set output sprintf('cluster_out/protein_%s.png', systype[sys])
+    plot for [r=1:3] infile(sys, r) using 1:($3 == 0 ? 0.0001 : $3*100) \
+    with lines title ptitle(sys, r)
+}
+
+# plot by replica
+do for [r=1:3] {
+    set output sprintf('cluster_out/protein_%d.png', replica[r])
+    plot for [sys=1:4] infile(sys, r) using 1:($3 == 0 ? 0.0001 : $3*100) \
+    with lines title ptitle(sys, r)
+}

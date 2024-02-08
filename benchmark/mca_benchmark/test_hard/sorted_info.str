@@ -1,0 +1,53 @@
+* System non-membrane PSF/CRD files, sorted by molecular radius in descending order
+* Usage: stream sorted_info.str index sorttype
+* If index .eq. 0, only the number of that type is stored
+*
+
+if @?IN1 .eq. 0 stop ! ABNORMAL TERMINATION: missing index
+if @?IN2 .eq. 0 stop ! ABNORMAL TERMINATION: missing sort type
+if @IN1 .lt. 0 stop ! ABNORMAL TERMINATION: invalid index
+
+! index of each uploaded structure, sorted in descending order of molecular
+! radius; used to place largest structures first, and to determine non-bond
+! interaction radius
+if @IN2 .eq. solvated then
+    if @IN1 .eq. 1 set structi = 5 ! 6y3g
+    if @IN1 .eq. 2 set structi = 3 ! 2hac
+    if @IN1 .eq. 3 set structi = 1 ! 1mjc
+    if @IN1 .eq. 4 set structi = 4 ! 3gb1
+    if @IN1 .eq. 5 set structi = 2 ! 1vii
+    set numtype = 5
+    if @IN1 .gt. @numtype stop ! ABNORMAL TERMINATION: invalid index
+    return
+endif
+
+if @IN2 .eq. solvent then
+    set numtype = 0
+    set structi = 0
+    set numtype = 0
+    return
+endif
+
+if @IN2 .eq. ion then
+    set numtype = 0
+    set structi = 0
+    set numtype = 0
+    return
+endif
+
+if @IN2 .eq. memb then
+    set numtype = 0
+    set structi = 0
+    set numtype = 0
+    return
+endif
+
+if @IN2 .eq. periodic then
+    set numtype = 0
+    set structi = 0
+    set numtype = 0
+    return
+endif
+
+stop ! ABNORMAL TERMINATION: unknown sort type
+

@@ -1,0 +1,17 @@
+* Number of each non-solvent structure, as chosen by user;
+* solvent and ion structures counts are 0 for this step
+* Usage: stream step2_count.str index
+*
+
+if @?IN1 .eq. 0 stop ! ABNORMAL TERMINATION: missing index
+
+! Solvated component counts
+if @IN1 .eq. 1 set nlig = 10
+if @IN1 .eq. 2 set nlig = 10
+if @IN1 .eq. 3 set nlig = 10
+
+set nsolv = 30
+set nmemb = 0
+set nperiodic = 0
+set nother = 0
+

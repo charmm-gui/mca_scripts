@@ -1,0 +1,11 @@
+* Defines "inpbc" selection, which selects all atoms located within regions
+* reserved for periodic components or for a membrane.
+*
+if @?IN2 .eq. 0 set IN2 = none
+if IN1 .eq. exclude then
+    define inpbc select none end
+    return
+endif
+
+define inpbc select none end
+

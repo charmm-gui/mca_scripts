@@ -1,0 +1,25 @@
+* box dims for every test
+*
+
+if @?proteinvv .eq. 0 stop  ! missing volume fraction
+
+if @?testtype .eq. 0 stop  ! missing test type (easy/hard)
+if testtype .eq. easy goto easy
+if testtype .eq. hard goto hard
+stop  ! invalid test type
+
+label easy
+calc testmolvol = 204180.9357
+
+goto getdim
+
+label hard
+calc testmolvol = 385627.59496
+
+label getdim
+
+calc totalvol = @testmolvol / @proteinvv
+calc xdim = @totalvol ** (1/3)
+calc ydim = @xdim
+calc zdim = @xdim
+

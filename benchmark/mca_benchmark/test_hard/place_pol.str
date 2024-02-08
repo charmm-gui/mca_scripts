@@ -1,0 +1,43 @@
+* Polymer placing routine.
+* Required global variables:
+*   structi  index of the current structure
+*   segid    ID of the segment containing the beads to position
+*   resid    ID of the residue "" "" ""
+*   pname    polymer's residue name
+* Assumes bead position arrays are already defined, e.g.,:
+*   set above = 1
+*   set inside = 1
+*   set below = 0
+*   set above_x = some x position
+*   etc.
+* These should be automatically defined and located in polinfo/
+*
+
+if above .gt. 0 then
+    set xcor = @{above_x}
+    set ycor = @{above_y}
+    set zcor = @{above_z}
+
+    coor set xdir @xcor ydir @ycor zdir @zcor -
+             sele atom @segid @resid @{pname}A end
+endif
+
+if inside .gt. 0 then
+    set xcor = @{inside_x}
+    set ycor = @{inside_y}
+    set zcor = @{inside_z}
+
+    coor set xdir @xcor ydir @ycor zdir @zcor -
+             sele atom @segid @resid @{pname}I end
+endif
+
+if below .gt. 0 then
+    set xcor = @{below_x}
+    set ycor = @{below_y}
+    set zcor = @{below_z}
+
+    coor set xdir @xcor ydir @ycor zdir @zcor -
+             sele atom @segid @resid @{pname}B end
+endif
+
+
