@@ -5,6 +5,7 @@ charmm $@ << ENDCHARMM
 *
 
 ! Usage: charmm [ARGS] -i psfdcd2pdbcrd.inp
+! Usage: ./psfdcd2pdbcrd [argname=argvalue ...]
 !
 !   Filename Arguments:
 !       Name    Type      Explanation
