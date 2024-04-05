@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source settings.sh
+
 is_fail() {
     if [ -z "$1" ]; then exit 2; fi
     tail -n 100 $1 | grep -q "ABNORMAL TERMINATION"
@@ -22,11 +24,10 @@ get_runtime() {
     python -c "print(f'{$n * $mul:.5e}')"
 }
 
-nreps=12
 for t in easy hard; do
     resultfile=stats.$t.dat
     echo '# vv rep runtime result (0=success, 1=fail)' >$resultfile
-    for vv in {10..42}; do
+    for vv in `seq $first_vv $last_vv`; do
         for rep in `seq $nreps`; do
             tname=test_${t}_${vv}_${rep}
             outfile=$tname/step2_molpacking.out

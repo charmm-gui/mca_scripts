@@ -2,32 +2,18 @@
 
 set -e
 
+source settings.sh
+
 base=step2_molpacking
 infile=$base.inp
 outfile=$base.out
 errfile=$base.err
 
-N_CPUS=2
-
-is_abnormal() {
-    if [ -z "$1" ]; then exit 1; fi
-    tail -n 6 $@ | grep ABNORMAL | wc -l
-}
-
-is_normal() {
-    if [ -z "$1" ]; then exit 1; fi
-    tail -n 100 $@ | grep "CHARMM> *energy" | wc -l
-}
-
 if [ -z "$1" ]; then
     (
-        #for t in easy hard; do
-        for t in easy; do
-            #for vv in {10..41}; do
-            for vv in 42; do
-                #if [[ $t == easy && $vv -lt 30 ]]; then continue; fi
-                for rep in `seq 12`; do
-                    #if [[ $vv == 24 && $rep -lt 6 ]]; then continue; fi
+        for t in easy hard; do
+            for vv in `seq $first_vv $last_vv`; do
+                for rep in `seq $nreps`; do
                     echo $t $vv $rep
                 done
             done
@@ -37,17 +23,6 @@ else
     t=$1
     vv=$2
     rep=$3
-
-    #if [ "$vv" == 10 ]; then
-    #    :
-    #else
-    #    vprev=$(($vv-1))
-    #    prev_test=test_${t}_${vprev}_*/$outfile
-    #    n_abnml=$(is_abnormal $prev_test)
-    #    n_nml=$(is_normal $prev_test)
-    #    if [ "$n_abnml" -eq 3 ]; then exit 1; fi
-    #    if [ "$n_nml" -eq 0 ]; then exit 1; fi
-    #fi
 
     dir=test_${t}_${vv}_${rep}
     echo running $dir

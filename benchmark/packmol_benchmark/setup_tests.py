@@ -1,6 +1,18 @@
 #!/usr/bin/env python
 import os
 
+########################
+# EDIT BELOW THIS LINE #
+########################
+
+nreps = 12
+first_vv = 10
+last_vv = 39
+
+########################
+# EDIT ABOVE THIS LINE #
+########################
+
 header = """
 # dcut used by MCA
 tolerance 2.5
@@ -68,14 +80,12 @@ COUNT = {
     }
 }
 
-nreps = 12
-vvs = [(i+10)/100 for i in range(30)]
+vvs = [(i+first_vv)/100 for i in range(last_vv - first_vv + 1)]
 for difficulty in ('easy', 'hard'):
     for protein_vv in vvs:
         D = get_dim(protein_vv, difficulty)
         center = 0., 0., 0.
 
-        #print(f"D_{protein_vv:.2f} = {D:.5f}")
         script_tpl = tpl.replace('DLEN', f"{D:.5f}")
 
         script = [header]

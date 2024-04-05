@@ -5,7 +5,7 @@ import MDAnalysis as mda
 
 macromolecules = [
     'fba', 'pgi', 'pgk', 'gapa', 'eno', 'pdhx', 'pdha', 'pdhb', 'acka', 'nox',
-    'pta', 'rp', 'if2', 'eftu', 'grol', 'trna',
+    'pta', 'if2', 'eftu', 'grol', 'trna',
 ]
 
 parser = argparse.ArgumentParser()

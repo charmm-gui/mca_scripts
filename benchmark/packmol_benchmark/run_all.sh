@@ -2,22 +2,23 @@
 
 set -e
 
-NCPUS=4
-NREPS=12
+source settings.sh
+
 if [ -z "$@" ]; then
-    # call self w/ up to 8 parallel processes
-    #for t in easy hard; do
-    #for t in easy; do
-    for t in hard; do
-        for vv in {10..40}; do
+    # call self w/ up to $NCPUS parallel processes
+    for t in easy hard; do
+        for vv in `seq $first_vv $last_vv`; do
             for rep in `seq $NREPS`; do
                 echo test_${t}_${vv}_${rep}
             done
         done
     done | xargs -n 1 -P $NCPUS $0
 else
+    # skip nonexistent test
     if [ ! -e $1 ]; then exit; fi
+    # skip already finished test
     if [ -e $1/pack.out ]; then exit; fi
+
     echo running $1
     cd $1
     packmol < pack.inp > pack.out

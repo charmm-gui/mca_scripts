@@ -2,6 +2,8 @@
 
 set -e
 
+source settings.sh
+
 is_abnormal() {
     if [ -z "$1" ]; then exit 1; fi
     tail -n 6 $@ | grep ABNORMAL | wc -l
@@ -28,10 +30,10 @@ for t in easy hard; do
         echo "    abnormal terminations: $n_abnml"
 
         set +e
-        let "n_fail = (3 - n_nml) + n_abnml"
+        let "n_fail = ($nreps - n_nml) + n_abnml"
         echo "    failures: $n_fail"
 
-        if [ "$n_fail" -ge 3 ]; then
+        if [ "$n_fail" -ge "$nreps" ]; then
             echo $tname failed
             tfails[$ntfail]="${t}_$(($vprev-1))"
             ((++ntfail))

@@ -2,8 +2,6 @@
 import numpy as np
 from scipy.stats import sem
 
-# plt.style.use('_mpl-gallery')
-
 for ttype in ['easy', 'hard']:
     data = np.loadtxt(f'stats.{ttype}.dat')
 
@@ -29,11 +27,7 @@ for ttype in ['easy', 'hard']:
 
     # reformat 3 reps into a separate axis
     nrow, ncol = data.shape
-    try:
-        data = data.reshape(nrow//nrep, nrep, ncol)
-    except:
-        breakpoint()
-        pass
+    data = data.reshape(nrow//nrep, nrep, ncol)
 
     # average along reps axis
     means = data.mean(axis=1)
