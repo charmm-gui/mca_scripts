@@ -4,10 +4,10 @@
  * Python 2.11+ or 3.x
  * OpenMM
 
-Example usage
--------------
+# Example usage
 
-# Step 0: Extract input structures
+Step 0: Extract input structures
+-----
 
 These are the files we will be processing for upload to CHARMM-GUI.
 
@@ -26,7 +26,8 @@ This adds the following new files to the current directory:
 
 The `toppar.str` and `toppar/*` files are needed for running CHARMM.
 
-# Step 1: Convert PSF + RST to CHARMM CRD
+Step 1: Convert PSF + RST to CHARMM CRD
+-----
 
 This approach uses `ommrst2crd.py` (convert OpenMM RST to CRD).
 
@@ -50,7 +51,8 @@ I.e., we need an RST file, a PSF file, and an output filename. A later script we
 
 This should result in a new file named `step7_500.crd`.
 
-# Step 1 (Alternative) Convert PSF + DCD to CHARMM CRD
+Step 1 (Alternative) Convert PSF + DCD to CHARMM CRD
+-----
 
 If you instead have a PSF and DCD file, you can use `psfdcd2pdbcrd`. This program requires CHARMM.
 
@@ -60,7 +62,8 @@ Detailed usage is provided in the comment from lines 7 through 39. For example, 
     $ ./psfdcd2pdbcrd psf=step5_charmm2omm.psf dcd=step7_1.dcd out=step7_500 frame=1
 ```
 
-# Step 2: Strip water and ions, save output as axolemma.psf / axolemma.crd
+Step 2: Strip water and ions, save output as axolemma.psf / axolemma.crd
+-----
 
 This step requires CHARMM and `toppar.str` + `toppar/*` in the current directory.
 
