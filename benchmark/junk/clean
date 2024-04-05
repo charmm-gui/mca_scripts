@@ -1,8 +1,0 @@
-#!/bin/bash
-
-for pf in *.pid */*.pid; do
-    if [ -e "$pf" ]; then
-        kill $(cat $pf)
-        rm "$pf"
-    fi
-done
