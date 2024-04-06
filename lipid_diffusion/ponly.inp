@@ -1,0 +1,17 @@
+* remove everything except phosphate
+*
+
+prnlev 0
+wrnlev 0
+stream toppar.str
+prnlev 5
+wrnlev 5
+
+read psf  card name step5_assembly.psf
+read coor card name step5_assembly.crd
+
+define P select segid MEMB .and. type P end
+delete atom select .not. P end
+
+write psf  card name phosphates.psf
+
