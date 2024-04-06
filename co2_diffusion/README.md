@@ -7,7 +7,6 @@
  - numpy >= 1.24.3
  - mdtraj >= 1.9.9
  - matplotlib >= 3.8.2
- - pint >= 0.22
 
 The commands below assume you have 2 microseconds of simulation for 3 replicas each of PET and PEF systems.
 
@@ -30,7 +29,7 @@ Trajectory reduction
 For this analysis, we only need the carbon atom of CO2 from all saved frames. This command creates a reduced trajectory and places it in this directory, named according to the replica:
 
 ```
-    ./convert_all.sh
+    $ ./convert_all.sh
 ```
 
 If you have a different number of trajectory files than 2000, edit line 8 of `convert_all.sh`, which looks like this:
@@ -84,5 +83,62 @@ It can be run for individual trajectories, e.g., to help decide what options loo
 
 Then perform the analysis on all trajectories:
 ```
-    ./calc_all
+    $ ./calc_all
 ```
+
+Plotting diffusion coefficients
+-----
+
+__Plotting several estimates together__
+
+`plot_D.gpl` is a Gnuplot script that plots 3 diffusion constant estimates:
+
+ - tau=2: calculated from standard deviation of displacement when lag time = 2 ns.
+ - tau=5: same as above with lag time of 5 ns.
+ - tau=[1,10]: calculated by fitting a line to MSD with lag times between 1-10 ns.
+
+Usage:
+```
+    $ ./plot_D.gpl
+    # alternatively:
+    $ gnuplot plot_D.gpl
+```
+
+Output is enhanced postscript format (`.eps`) and written to `D_figures/`. Example outputs:
+
+ - `pef_co2_1.eps`: Diffusion constants for PEF+CO<sub>2</sub> replica 1
+ - `pet_co2_avg_sem.eps`: Mean ± S.E.M. diffusion constants for all PET+CO<sub>2</sub> replicas
+ - `pet_co2_avg_only.eps`: Mean (no SEM) diffusion constants for all PET+CO<sub>2</sub> replicas
+
+__Plotting MSD fits only__
+
+`plot_fit_D.py` plots the result of fitting a line to MSD and saves the result in `figures/`. It also averages (± S.E.M.) the tau=2, tau=5, and tau=[1,10] estimates between ±1.5 nm and prints the result in units of nm<sup>2</sup>/ns.
+
+E.g.:
+```
+    $ ./plot_fit_D.py
+    pet:
+        2.0                 5.0                 fit                 
+        1.467e-02±1.244e-03 1.131e-02±1.627e-03 7.798e-03±2.223e-03 
+    pef:
+        2.0                 5.0                 fit                 
+        1.689e-02±1.181e-03 9.831e-03±6.517e-04 3.971e-03±3.117e-04 
+```
+
+__Plotting a small sample of line fits__
+
+To visually check the quality of fitting to MSD, a small sample of bins taken near the middle of the membrane are chosen for plotting.
+
+These values (lines 12-14) should match those used to generate diffusion data (`.dat`) files:
+```
+    from_t = 1.
+    to_t = 10.
+    dt = .1
+```
+
+To generate the plots:
+```
+    $ ./plot_sample_fit.py
+```
+
+Output is stored in `sample_figures/` with the same naming scheme as in __Plotting MSD fits only__.
