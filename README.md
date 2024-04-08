@@ -10,6 +10,10 @@ Used to perform benchmark with MCA and PACKMOL. Includes initial coordinates and
 
 CO<sub>2</sub> diffusion calculations.
 
+# `initial_structures/`
+
+Initial structures, coordinates, and simulation settings used to run OpenMM simulations.
+
 # `lipid_diffusion/`
 
 Mica + POPC lipid diffusion calculations.
