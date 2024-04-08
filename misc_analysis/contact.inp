@@ -13,7 +13,7 @@ if @?crd .eq. 0 set crd = @base.crd
 if @?sysinfo .eq. 0 set sysinfo = @base.str
 
 if @?cntmin  .eq. 0 set cntmin = 1
-if @?cntmax  .eq. 0 set cntmin = 1000
+if @?cntmax  .eq. 0 set cntmax = 1000
 if @?trajdir .eq. 0 set trajdir = openmm
 
 ! output suffix, to allow parallel jobs
